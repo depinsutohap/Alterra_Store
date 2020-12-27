@@ -26,6 +26,16 @@ func main() {
 		Name 	string
 		Category_id int
 	}
+	type Category struct {
+		Id         int
+		Name 	string
+	}
+	type Cart struct {
+		Id         int
+		Product_id int
+		Qty int
+		Checkout int
+	}
 	router := gin.Default()
 
 // GET all products
@@ -52,6 +62,28 @@ router.GET("/products", func(c *gin.Context) {
 	})
 })
 
+	// POST new person details
+	router.POST("/addcart", func(c *gin.Context) {
+		product_id := c.PostForm("product_id")
+		stmt, err := db.Prepare("insert into cart (product_id) values(?);")
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+		_, err = stmt.Exec(product_id)
+
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+
+		defer stmt.Close()
+		row := db.QueryRow("select name from product where id = ?;", product_id)
+		var product Product
+		err = row.Scan(&product.Name)
+		c.JSON(http.StatusOK, gin.H{
+			"message": fmt.Sprintf("%s successfully added to cart", product.Name),
+		})
+	})
+
 	// // GET a person detail
 	// router.GET("/person/{:id}", func(c *gin.Context) {
 	// 	var (
@@ -76,32 +108,6 @@ router.GET("/products", func(c *gin.Context) {
 	// 	c.JSON(http.StatusOK, result)
 	// })
 
-
-	// // POST new person details
-	// router.POST("/person", func(c *gin.Context) {
-	// 	var buffer bytes.Buffer
-	// 	first_name := c.PostForm("first_name")
-	// 	last_name := c.PostForm("last_name")
-	// 	stmt, err := db.Prepare("insert into person (first_name, last_name) values(?,?);")
-	// 	if err != nil {
-	// 		fmt.Print(err.Error())
-	// 	}
-	// 	_, err = stmt.Exec(first_name, last_name)
-
-	// 	if err != nil {
-	// 		fmt.Print(err.Error())
-	// 	}
-
-	// 	// Fastest way to append strings
-	// 	buffer.WriteString(first_name)
-	// 	buffer.WriteString(" ")
-	// 	buffer.WriteString(last_name)
-	// 	defer stmt.Close()
-	// 	name := buffer.String()
-	// 	c.JSON(http.StatusOK, gin.H{
-	// 		"message": fmt.Sprintf(" %s successfully created", name),
-	// 	})
-	// })
 
 	// // PUT - update a person details
 	// router.PUT("/person", func(c *gin.Context) {
