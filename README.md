@@ -1,6 +1,8 @@
 ## Required Package
 go get github.com/gin-gonic/gin
+
 go get github.com/go-sql-driver/mysql
+
 Don't Forget to put the database
 
 ## How To Use
