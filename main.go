@@ -132,5 +132,32 @@ router.GET("/cart", func(c *gin.Context) {
 		})
 	})
 
+	// POST checkout product in cart
+	router.POST("/checkoutcart", func(c *gin.Context) {
+		row := db.QueryRow("select COUNT(id) from cart where checkout != 1")
+		var count int
+		row.Scan(&count)
+		if count <= 0 {
+			c.JSON(http.StatusOK, gin.H{
+				"message": fmt.Sprintf("Please Add Product to Cart first"),
+			})
+		}else{
+			stmt, err := db.Prepare("UPDATE cart SET checkout = ?;")
+			if err != nil {
+				fmt.Print(err.Error())
+			}
+			_, err = stmt.Exec(1)
+	
+			if err != nil {
+				fmt.Print(err.Error())
+			}
+	
+			defer stmt.Close()
+			c.JSON(http.StatusOK, gin.H{
+				"message": fmt.Sprintf("You successfully checkout please continue to the payment section"),
+			})
+		}
+	})
+
 	router.Run(":3000")
 }
